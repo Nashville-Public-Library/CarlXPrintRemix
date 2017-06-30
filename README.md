@@ -4,7 +4,7 @@ For libraries using the TLC Carl.X Integrated Library System. Remix Carl.X print
 CarlXPrintRemix Installation
 
 INSTALL JSCRIPT 
-1.	copy CarlXPrintRemix.js from https://github.com/Nashville-Public-Library/CarlXPrintRemix/CarlXPrintRemix.js to 'C:\Program Files\CarlX\Live\CarlXPrintRemix.js'
+1.	copy CarlXPrintRemix.js from https://github.com/Nashville-Public-Library/CarlXPrintRemix/blob/master/CarlXPrintRemix.js to 'C:\Program Files\CarlX\Live\CarlXPrintRemix.js'
 
 INSTALL REDMON 1.9
 1.	Information on RedMon can be found at http://pages.cs.wisc.edu/~ghost/redmon/
