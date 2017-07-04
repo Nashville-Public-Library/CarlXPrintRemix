@@ -29,7 +29,7 @@ CONFIGURE PRINTER PORT RP1:
 7.	In Print Management central pane, right click RPT1: and select Configure Port…
 8.	In the RPT1: Properties dialog
 a.	Redirect this port to the program: cscript
-b.	Arguments for the program are: /nologo 'C:\Program Files\CarlX\Live\CarlXPrintRemix.js'
+b.	Arguments for the program are: /nologo "C:\Program Files\CarlX\Live\CarlXPrintRemix.js"
 c.	Output: Copy stdout to printer
 d.	Printer: EPSON TM-T88[…]
 e.	Run: Normal
