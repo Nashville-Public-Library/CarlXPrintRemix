@@ -1,47 +1,15 @@
 // CarlXPrintRemix.js
 // James Staub
 // Nashville Public Library
-// remix CarlX print jobs that are simple text
-// e.g., order record print
-
-/* ASSUMPTIONS
-page is 80 characters wide
-we need to get this done - program for Nashville, not for every conceivable customer
-basic order of printout is 
-	record type, record number (e.g., b1000008), Last Updated:, Created:, Revisions:
-	fixed-length field table
-	variable-length fields
-	with bib record information first, item or order information second 
-each variable-length label happens at the first position in the line
-length of fixed-length variable label and value label determine width of order ficed length field column
-	e.g., in order record, a column composed of LOCATION, CDATE, CLAIM, COPIES, CODE1, CODE2, CODE3, PBACK will be 9 characters wide (LOCATION = 8, plus one padding space)
-	ergo, we've got to explicitly look for each variable name
-we don't need to grab the full label for fixed-length values that span multiple lines
-*/
-
-/* Eek! notes in dev
-Requires way too much overhead - gonna haveta reduce time-to-print
-create redmon redirect port AND and additional Generic/Text Only printer on top of that:
-Devices and Printers > Add Printer > Existing Port > RPT[whatever the CarlX slips redmon printer port is]
-Driver: Generic / Text Only
-Don't print test page
-This text only printer strips out the encoding from the Carl job - so I can parse and rewrite the output.
-
-! CARL.X custom receipts show have all output in Consolas 10pt. Styling in Proportional fonts will create unexpected space characters. 
-*/
+// remix CarlX print jobs
 
 // FUNCTIONS
-
 function LimitlessLibraries_PatronAPI_ChargeReceipt(patronId) {
-	// requires Internet Options > Security > Trusted Sites > Sites > [Uncheck Require server verification (https:) for all sites in this zone] > Add this website to the zone: nashapp.library.nashville.org 
-	// may need more at ActiveX controls and plug-ins
-	// Initialize and script ActiveX controls not marked as safe for scripting [doubtful...]
-//var xmlhttp = new ActiveXObject("WinHttp.XMLHttpRequest");
-
 	var strResult;
 	try
 	{
 		// Create the WinHTTPRequest ActiveX Object.
+		// TO DO : make the call the response parser more XMLish
 		// var xmlhttp = new ActiveXObject("WinHttp.XMLHttpRequest"); // yields WinHTTP error 429
 		var xmlhttp = new ActiveXObject("WinHttp.WinHttpRequest.5.1");
 		//  Create an HTTP request.
@@ -74,18 +42,7 @@ function LimitlessLibraries_PatronAPI_ChargeReceipt(patronId) {
     }
     //  Return the response text.
     return strResult;
-
-/*
-	xmlhttp.onreadystatechange = function () {
-		if (xmlhttp.readyState == 4) {
-			if (xmlhttp.status == 200) {
-				// alert('done. use firebug/console to see network response');
-			}
-		}
-	}
-*/
 }
-
 
 // SCRIPT
 var hold=false;
@@ -97,163 +54,153 @@ do {
 }
 while (!WScript.StdIn.AtEndOfStream);
 
-// SCHOOLS
+// SCHOOLS LOOKUP
+// TO DO : Determine whether Carl.X API could be reliable enough to use instead of this static lookup
 var schools = {
-"00152" : "Davis Early Learning Center",
-"01681" : "Ross Early Learning Center",
-"03186" : "Casa Azafran Early Learning Center-delivery via Martin Center",
-"04419" : "Cambridge Early Learning Center-delivery via Martin Center",
-"10105" : "Amqui Elementary ",
-"11122" : "Lakeview Elementary",
-"12135" : "Bellshire Elementary",
-"13145" : "Norman Binkley Elementary",
-"14165" : "Buena Vista Elementary",
-"15175" : "Caldwell Elementary",
-"16184" : "Cane Ridge Elementary",
-"17185" : "Carter Lawrence Elementary",
-"18200" : "Chadwell Elementary",
-"19205" : "Charlotte Park Elementary",
-"1A215" : "Cockrill Elementary",
-"1B225" : "Cole Elementary",
-"1C230" : "Hattie Cotton Elementary",
-"1D235" : "Crieve Hall Elementary",
-"1E240" : "Cumberland Elementary",
-"1F252" : "Dodson Elementary",
-"1G265" : "Dupont Elementary",
-"1H280" : "Eakin Elementary",
-"1I308" : "Fall-Hamilton Elementary",
-"1J310" : "Moss Elementary",
-"1K315" : "Gateway Elementary",
-"1L320" : "Glencliff Elementary",
-"1M330" : "Glendale Elementary",
-"1N335" : "Glengarry Elementary",
-"1O340" : "Glenn Elementary",
-"1P345" : "Glenview Elementary",
-"1Q350" : "Goodlettsville Elementary",
-"1R360" : "Gower Elementary",
-"1S370" : "Granbery Elementary",
-"1T375" : "Alex Green Elementary",
-"1U380" : "Julia Green Elementary",
-"1V395" : "Harpeth Valley Elementary",
-"1W405" : "Haywood Elementary",
-"1X415" : "Hermitage Elementary",
-"1Y420" : "Hickman Elementary",
-"1Z451" : "Hull-Jackson Montessori ",
-"20455" : "Inglewood Elementary",
-"21460" : "Andrew Jackson Elementary",
-"22465" : "Joelton Elementary",
-"23485" : "Jones Paideia Magnet Elementary",
-"24495" : "Tom Joy Elementary",
-"25496" : "A. Z. Kelley Elementary",
-"26500" : "Robert E Lillard Elementary",
-"27505" : "Kirkpatrick Elementary",
-"28520" : "Lockeland Elementary",
-"29522" : "Ruby Major Elementary",
-"2A530" : "McGavock Elementary",
-"2B552" : "Maxwell Elementary",
-"2C560" : "Dan Mills Elementary",
-"2D575" : "Thomas A. Edison Elementary",
-"2E576" : "Mt. View Elementary",
-"2F590" : "Napier Elementary",
-"2G595" : "Neely's Bend Elementary",
-"2H610" : "Old Center Elementary",
-"2I618" : "Paragon Mills Elementary",
-"2J620" : "Park Avenue Elementary",
-"2K640" : "Pennington Elementary",
-"2L650" : "Percy Priest Elementary",
-"2M670" : "Rosebank Elementary",
-"2N682" : "Shayne Elementary",
-"2O685" : "Shwab Elementary",
-"2P686" : "Smith Springs Elementary",
-"2Q690" : "Stanford Montessori Elementary",
-"2R710" : "Stratton Elementary",
-"2S715" : "Sylvan Park  Elementary",
-"2T717" : "Tulip Grove  Elementary",
-"2U725" : "Tusculum Elementary",
-"2V735" : "Una Elementary",
-"2W755" : "Warner Elementary",
-"2X765" : "Waverly-Belmont Elementary",
-"2Y775" : "Westmeade Elementary",
-"2Z784" : "Robert Churchwell Elementary",
-"30790" : "Whitsitt Elementary",
-"40100" : "Margaret Allen Middle",
-"41111" : "Antioch Middle",
-"43120" : "Jere Baxter Middle",
-"44130" : "Bellevue Middle",
-"45238" : "Croft Middle",
-"46260" : "Donelson Middle",
-"47270" : "Dupont Hadley Middle",
-"48275" : "Dupont Tyler Middle",
-"49285" : "John Early Middle",
-"4A296" : "East Literature Middle",
-"4B355" : "Goodlettsville Middle",
-"4C365" : "Gra-Mar Middle",
-"4D400" : "Haynes Middle",
-"4E410" : "Head Middle Magnet",
-"4F434" : "Hill, H. G. Middle",
-"4G470" : "Joelton Middle",
-"4H498" : "J F Kennedy Middle",
-"4I510" : "Litton Middle ",
-"4J535" : "McKissack Middle",
-"4K540" : "McMurray Middle",
-"4L545" : "Madison Middle",
-"4M551" : "Marshall Middle",
-"4N555" : "Meigs Middle Magnet",
-"4O563" : "J.T. Moore Middle",
-"4P577" : "Apollo Middle",
-"4S612" : "Oliver Middle",
-"4T675" : "Rose Park Middle",
-"4U730" : "Two Rivers Middle",
-"4V770" : "West End Middle",
-"4W783" : "Creswell Arts Middle",
-"4X805" : "Wright Middle ",
-"4Y540" : "McMurray Annex @ Tusculum",
-"60110" : "Antioch High ",
-"61182" : "Cane Ridge High ",
-"62242" : "Nashville School of the Arts",
-"63290" : "East Literature High",
-"64325" : "Glencliff High ",
-"65397" : "Harris Hillman",
-"66435" : "Hillsboro High",
-"67440" : "Hillwood High",
-"68448" : "Cora Howe School",
-"69450" : "Hume-Fogg High Magnet",
-"6A452" : "Hunter's Lane High",
-"6C497" : "MLK Jr. Magnet",
-"6D532" : "McGavock High",
-"6E550" : "Maplewood High",
-"6F615" : "Overton High",
-"6G632" : "Pearl-Cohn High",
-"6H705" : "Stratford High",
-"6I787" : "Whites Creek High",
-"70142" : "Nashville Big Picture High-delivery via Martin Center",
-"71181" : "Cameron College Prep",
-"72211" : "Academy at Old Cochrill-delivery via Martin Center",
-"73422" : "Academy at Hickory Hollow-delivery via Martin Center",
-"74562" : "Middle College High-delivery via Martin Center",
-"76613" : "Academy at Opry Mills-delivery via Martin Center",
-"77655" : "Martin Professional Development Center",
-"78508" : "LEAD Academy High",
-"79118" : "Brick Church College Prep",
-"7A504" : "KIPP Nashville Collegiate High",
-"7B507" : "LEAD Prep Southeast",
-"7C743" : "Valor Flagship Academy",
-"7D744" : "Valor Voyager Academy",
-"7E601" : "Neely’s Bend College Prep" };
+	"00152" : "Davis Early Learning Center",
+	"01681" : "Ross Early Learning Center",
+	"03186" : "Casa Azafran Early Learning Center-delivery via Martin Center",
+	"04419" : "Cambridge Early Learning Center-delivery via Martin Center",
+	"10105" : "Amqui Elementary ",
+	"11122" : "Lakeview Elementary",
+	"12135" : "Bellshire Elementary",
+	"13145" : "Norman Binkley Elementary",
+	"14165" : "Buena Vista Elementary",
+	"15175" : "Caldwell Elementary",
+	"16184" : "Cane Ridge Elementary",
+	"17185" : "Carter Lawrence Elementary",
+	"18200" : "Chadwell Elementary",
+	"19205" : "Charlotte Park Elementary",
+	"1A215" : "Cockrill Elementary",
+	"1B225" : "Cole Elementary",
+	"1C230" : "Hattie Cotton Elementary",
+	"1D235" : "Crieve Hall Elementary",
+	"1E240" : "Cumberland Elementary",
+	"1F252" : "Dodson Elementary",
+	"1G265" : "Dupont Elementary",
+	"1H280" : "Eakin Elementary",
+	"1I308" : "Fall-Hamilton Elementary",
+	"1J310" : "Moss Elementary",
+	"1K315" : "Gateway Elementary",
+	"1L320" : "Glencliff Elementary",
+	"1M330" : "Glendale Elementary",
+	"1N335" : "Glengarry Elementary",
+	"1O340" : "Glenn Elementary",
+	"1P345" : "Glenview Elementary",
+	"1Q350" : "Goodlettsville Elementary",
+	"1R360" : "Gower Elementary",
+	"1S370" : "Granbery Elementary",
+	"1T375" : "Alex Green Elementary",
+	"1U380" : "Julia Green Elementary",
+	"1V395" : "Harpeth Valley Elementary",
+	"1W405" : "Haywood Elementary",
+	"1X415" : "Hermitage Elementary",
+	"1Y420" : "Hickman Elementary",
+	"1Z451" : "Hull-Jackson Montessori ",
+	"20455" : "Inglewood Elementary",
+	"21460" : "Andrew Jackson Elementary",
+	"22465" : "Joelton Elementary",
+	"23485" : "Jones Paideia Magnet Elementary",
+	"24495" : "Tom Joy Elementary",
+	"25496" : "A. Z. Kelley Elementary",
+	"26500" : "Robert E Lillard Elementary",
+	"27505" : "Kirkpatrick Elementary",
+	"28520" : "Lockeland Elementary",
+	"29522" : "Ruby Major Elementary",
+	"2A530" : "McGavock Elementary",
+	"2B552" : "Maxwell Elementary",
+	"2C560" : "Dan Mills Elementary",
+	"2D575" : "Thomas A. Edison Elementary",
+	"2E576" : "Mt. View Elementary",
+	"2F590" : "Napier Elementary",
+	"2G595" : "Neely's Bend Elementary",
+	"2H610" : "Old Center Elementary",
+	"2I618" : "Paragon Mills Elementary",
+	"2J620" : "Park Avenue Elementary",
+	"2K640" : "Pennington Elementary",
+	"2L650" : "Percy Priest Elementary",
+	"2M670" : "Rosebank Elementary",
+	"2N682" : "Shayne Elementary",
+	"2O685" : "Shwab Elementary",
+	"2P686" : "Smith Springs Elementary",
+	"2Q690" : "Stanford Montessori Elementary",
+	"2R710" : "Stratton Elementary",
+	"2S715" : "Sylvan Park  Elementary",
+	"2T717" : "Tulip Grove  Elementary",
+	"2U725" : "Tusculum Elementary",
+	"2V735" : "Una Elementary",
+	"2W755" : "Warner Elementary",
+	"2X765" : "Waverly-Belmont Elementary",
+	"2Y775" : "Westmeade Elementary",
+	"2Z784" : "Robert Churchwell Elementary",
+	"30790" : "Whitsitt Elementary",
+	"40100" : "Margaret Allen Middle",
+	"41111" : "Antioch Middle",
+	"43120" : "Jere Baxter Middle",
+	"44130" : "Bellevue Middle",
+	"45238" : "Croft Middle",
+	"46260" : "Donelson Middle",
+	"47270" : "Dupont Hadley Middle",
+	"48275" : "Dupont Tyler Middle",
+	"49285" : "John Early Middle",
+	"4A296" : "East Literature Middle",
+	"4B355" : "Goodlettsville Middle",
+	"4C365" : "Gra-Mar Middle",
+	"4D400" : "Haynes Middle",
+	"4E410" : "Head Middle Magnet",
+	"4F434" : "Hill, H. G. Middle",
+	"4G470" : "Joelton Middle",
+	"4H498" : "J F Kennedy Middle",
+	"4I510" : "Litton Middle ",
+	"4J535" : "McKissack Middle",
+	"4K540" : "McMurray Middle",
+	"4L545" : "Madison Middle",
+	"4M551" : "Marshall Middle",
+	"4N555" : "Meigs Middle Magnet",
+	"4O563" : "J.T. Moore Middle",
+	"4P577" : "Apollo Middle",
+	"4S612" : "Oliver Middle",
+	"4T675" : "Rose Park Middle",
+	"4U730" : "Two Rivers Middle",
+	"4V770" : "West End Middle",
+	"4W783" : "Creswell Arts Middle",
+	"4X805" : "Wright Middle ",
+	"4Y540" : "McMurray Annex @ Tusculum",
+	"60110" : "Antioch High ",
+	"61182" : "Cane Ridge High ",
+	"62242" : "Nashville School of the Arts",
+	"63290" : "East Literature High",
+	"64325" : "Glencliff High ",
+	"65397" : "Harris Hillman",
+	"66435" : "Hillsboro High",
+	"67440" : "Hillwood High",
+	"68448" : "Cora Howe School",
+	"69450" : "Hume-Fogg High Magnet",
+	"6A452" : "Hunter's Lane High",
+	"6C497" : "MLK Jr. Magnet",
+	"6D532" : "McGavock High",
+	"6E550" : "Maplewood High",
+	"6F615" : "Overton High",
+	"6G632" : "Pearl-Cohn High",
+	"6H705" : "Stratford High",
+	"6I787" : "Whites Creek High",
+	"70142" : "Nashville Big Picture High-delivery via Martin Center",
+	"71181" : "Cameron College Prep",
+	"72211" : "Academy at Old Cochrill-delivery via Martin Center",
+	"73422" : "Academy at Hickory Hollow-delivery via Martin Center",
+	"74562" : "Middle College High-delivery via Martin Center",
+	"76613" : "Academy at Opry Mills-delivery via Martin Center",
+	"77655" : "Martin Professional Development Center",
+	"78508" : "LEAD Academy High",
+	"79118" : "Brick Church College Prep",
+	"7A504" : "KIPP Nashville Collegiate High",
+	"7B507" : "LEAD Prep Southeast",
+	"7C743" : "Valor Flagship Academy",
+	"7D744" : "Valor Voyager Academy",
+	"7E601" : "Neely’s Bend College Prep" };
 // END SCHOOLS
 
 // TOKEN LIBRARY
-// TOKENS ARE DOCUMENTED AT 
-// https://carlcommunity.com/wp-content/uploads/2017/04/Admin-Workstation-Tools.pdf?page=14
-// BUT THAT DOCUMENTATION IS NOT CURRENT. SEE TLC TICKET 
-// IN CARL.X ADMIN > PRINT RECEIPT EDITOR
-// EACH KEY/VALUE ENTRY SHOULD LOOK LIKE
-// FIELD_CODE LEFTBRACE LEFTBRACE DOLLAR FIELD_CODE RIGHTBRACE RIGHTBRACE NEWLINE
-// E.G.,
-// BRD {{$BRD}}
-// EACH TEMPLATE SHOULD START WITH 
-// Type {{type value}}
-// Template {{template value}}
 //
 // Receipt Type
 var re = /Type \{\{(.+?)\}\}/;
@@ -438,12 +385,12 @@ if (matches !== null) { TTL = matches[1] };
 
 // LIMITLESS LIBRARIES PATRON API CALLS
 var isLL = false;
-var re = /(LIMITLESS|LL)/;
+var re = /LIMITLESS/;
 var matches = re.exec(receiptTemplate);
 if (matches !== null) { isLL = true };
 
 var LLResponse = "";
-var LLBranch = "";
+var LLBranchCode = "";
 var LLHomeroom = "";
 if (isLL == true) {
 	LLResponse = LimitlessLibraries_PatronAPI_ChargeReceipt(PIF);
@@ -469,16 +416,14 @@ if (hold == true) {
 }
 
 // COMPOSE PRINTED PAGE
-// EPSON ESC/POS information at http://www.epsonexpert.com/Epson_Assets/ESCPOS_Commands_FAQs.pdf
-// AND http://download.delfi.com/SupportDL/Epson/Manuals/TM-T88IV/Programming%20manual%20APG_1005_receipt.pdf
 newPrint += "\x1B" + "@"; // Initialize printer
 newPrint += "\x1B" + "D" + "\x26" + "\x01"; // set a single horizontal tab to 36th character 
 newPrint += "\x1D" + "b" + "\x01"; // smoothing mode on
 newPrint += "__________________________________________\n";
 
 // SINGLE SLIP
-// if (receiptType == "Hold-shelf Slip" OR receiptType == "In-transit Receipt" OR receiptType == "Hold/In-transit Receipt") {
-if (receiptType == "Hold/In-transit Receipt") {
+if (isLL == false && (receiptType == "Hold-shelf Slip" || receiptType == "In-transit Receipt" || receiptType == "Hold/In-transit Receipt")) {
+//if (receiptType == "Hold/In-transit Receipt") {
 	// TRANSIT AREA
 	newPrint += "\x1B" + "a" + "\x01"; // centered
 	newPrint += "\x1D" + "!" + "\x43"; // 5 x width, 4 x height
@@ -530,6 +475,12 @@ if (receiptType == "Hold/In-transit Receipt") {
 }
 
 // LL STICKY SLIP
+if (receiptType == "Hold/In-transit Receipt" && isLL == true) {
+	newPrint += "\x1D" + "\x68" + "\x50"; // set barcode height to 80 pt
+	newPrint += "\x1D" + "k" + "\x45" + "\x09" + PIF.toUpperCase(); // CODE39 barcode, might be wrong
+// TO DO : determine whether I can encode function keys (F2/F3) or ALT+ keys to control Carl.X staff client
+}
+
 if ((receiptType == "Charge Receipt" || receiptType == "Patron Receipt") && isLL == true) {
 	if (receiptType == "Patron Receipt") { DDT = DNS; }
 	newPrint += "\t" + ITZ + "\n";
@@ -559,10 +510,10 @@ if ((receiptType == "Charge Receipt" || receiptType == "Patron Receipt") && isLL
 }
 
 // THE END
-newPrint += "__________________________________________\n";
-// or an unknown line commend?
-
+// newPrint += "__________________________________________\n";
 newPrint += "\x1D" + "V" + "\x42"; // feed, partial cut
+// TO DO: CAN GS V C or GS V D reduce the wasted paper at the top of each page?
+//newPrint += "\x1D" + "V" + "\x67" + "\x10"; // feed, partial cut
 
 // PRINT!
 
