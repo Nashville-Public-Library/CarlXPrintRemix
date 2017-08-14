@@ -440,15 +440,7 @@ if (isLL == false && (receiptType == "Hold-shelf Slip" || receiptType == "In-tra
 		newPrint += LLBranchLabel + "\n";
 	}
 	newPrint += "\x1B" + "a" + "\x00"; // left-justified
-	// MNPS PATRON BARCODE
-	if (STB == "MNPS") {
-		newPrint += "\n\n";
-		newPrint += "\x1D" + "\x68" + "\x50"; // set barcode height to 80 pt
-		newPrint += "\x1D" + "k" + "\x45" + "\x09" + PIF.toUpperCase(); // CODE39 barcode, might be wrong
-		newPrint += "\n\n\n\n\n\n\n"; 
-	} else {
-		newPrint += "\n\n\n\n\n\n\n\n\n\n\n";
-	}
+	newPrint += "\n\n\n\n\n\n\n\n\n\n\n";
 	if (hold == false) {
 		newPrint += "\n\n\n\n";
 	}
@@ -477,7 +469,15 @@ if (isLL == false && (receiptType == "Hold-shelf Slip" || receiptType == "In-tra
 // LL STICKY SLIP
 if (receiptType == "Hold/In-transit Receipt" && isLL == true) {
 	newPrint += "\x1D" + "\x68" + "\x50"; // set barcode height to 80 pt
-	newPrint += "\x1D" + "k" + "\x45" + "\x09" + PIF.toUpperCase(); // CODE39 barcode, might be wrong
+	// MNPS PATRON BARCODE
+	newPrint += "\x1D" + "\x68" + "\x50"; // set barcode height to 80 pt
+	if (PIF.length == 9) {
+		newPrint += "\x1D" + "k" + "\x45" + "\x09" + PIF.toUpperCase(); // CODE39 barcode for student
+	} else if (PIF.length == 6) {
+		newPrint += "\x1D" + "k" + "\x45" + "\x06" + PIF.toUpperCase(); // CODE39 barcode for staff
+	} else {
+		newPrint += PIF + " is not a valid LL patron id.";
+	}
 // TO DO : determine whether I can encode function keys (F2/F3) or ALT+ keys to control Carl.X staff client
 }
 
