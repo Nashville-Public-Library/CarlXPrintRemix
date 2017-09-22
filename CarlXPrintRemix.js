@@ -476,7 +476,7 @@ if (receiptType == "Hold/In-transit Receipt" && isLL == true) {
 	} else if (PIF.length == 6) {
 		newPrint += "\x1D" + "k" + "\x45" + "\x06" + PIF.toUpperCase(); // CODE39 barcode for staff
 	} else if (PIF.length == 14) {
-		newPrint += "\x1D" + "k" + "\x45" + "\x14" + PIF.toUpperCase(); // CODE39 barcode for school library
+		newPrint += "\x1D" + "k" + "\x45" + "\x0E" + PIF.toUpperCase(); // CODE39 barcode for school library
 	} else {
 		newPrint += PIF + " is not a valid LL patron id.";
 	}
