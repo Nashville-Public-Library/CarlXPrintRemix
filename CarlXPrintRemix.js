@@ -476,7 +476,7 @@ if (receiptType == "Hold/In-transit Receipt" && isLL == true) {
 	} else if (PIF.length == 6) {
 		newPrint += "\x1D" + "k" + "\x45" + "\x06" + PIF.toUpperCase(); // CODE39 barcode for staff
 	} else if (PIF.length == 14) {
-		newPrint += "\x1D" + "k" + "\x45" + "\x0E" + PIF.toUpperCase(); // CODE39 barcode for school library
+		newPrint += "\x1D" + "k" + "\x45" + "\x08" + PIF.toUpperCase().substring(6) ; // CODE39 barcode for school library, left truncates the 251920 and depends on Carl.X auto-fill when scanning code into Staff > Circulation > Charge
 	} else {
 		newPrint += PIF + " is not a valid LL patron id.";
 	}
