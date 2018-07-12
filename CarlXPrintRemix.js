@@ -66,7 +66,7 @@ var schools = {
 	"12135" : "Bellshire Elementary",
 	"13145" : "Norman Binkley Elementary",
 	"14165" : "Buena Vista Elementary",
-	"15175" : "Caldwell Elementary",
+	"15175" : "Ida B Wells Elementary",
 	"16184" : "Cane Ridge Elementary",
 	"17185" : "Carter Lawrence Elementary",
 	"18200" : "Chadwell Elementary",
