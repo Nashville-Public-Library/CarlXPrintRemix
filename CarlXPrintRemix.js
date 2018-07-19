@@ -85,7 +85,6 @@ var schools = {
 	"1L320" : "Glencliff Elementary",
 	"1M330" : "Glendale Elementary",
 	"1N335" : "Glengarry Elementary",
-	"1O340" : "Glenn Elementary",
 	"1P345" : "Glenview Elementary",
 	"1Q350" : "Goodlettsville Elementary",
 	"1R360" : "Gower Elementary",
