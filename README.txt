@@ -25,7 +25,7 @@ CarlXPrintRemix
 CarlXPrintRemix Installation 
  
 1.INSTALL JSCRIPT 
-1.1.	copy CarlXPrintRemix.js from https://github.com/Nashville-Public-Library/CarlXPrintRemix/blob/master/CarlXPrintRemix.js to 'C:\Program Files\CarlX\Live\CarlXPrintRemix.js' 
+1.1.	Use Google Chrome. Copy CarlXPrintRemix.js from https://github.com/Nashville-Public-Library/CarlXPrintRemix/blob/master/CarlXPrintRemix.js to 'C:\Program Files\CarlX\Live\CarlXPrintRemix.js' 
  
 2.INSTALL REDMON 1.9 
 2.1.	Information on RedMon can be found at http://pages.cs.wisc.edu/~ghost/redmon/ 
