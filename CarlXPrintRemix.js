@@ -198,7 +198,8 @@ var schools = {
 	"7B507" : "LEAD Prep Southeast",
 	"7C743" : "Valor Flagship Academy",
 	"7D744" : "Valor Voyager Academy",
-	"7E601" : "Neely’s Bend College Prep" };
+	"7E601" : "Neely’s Bend College Prep",
+	"7G457" : "Independence Academy" };
 // END SCHOOLS
 
 // TOKEN LIBRARY
